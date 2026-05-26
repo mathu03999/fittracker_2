@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FitTracker Premium</title>
-  <!-- Google Fonts & Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   
@@ -60,7 +59,6 @@
       background: transparent;
     }
 
-    /* Header & Sync Cloud */
     .header {
       display: flex;
       justify-content: space-between;
@@ -102,7 +100,6 @@
       box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2);
     }
 
-    /* Navigation */
     .nav {
       display: flex;
       gap: 6px;
@@ -139,7 +136,6 @@
       box-shadow: var(--shadow);
     }
 
-    /* Cards & Glassmorphism */
     .tab { display: none; }
     .tab.active { display: block; animation: fadeIn 0.4s ease; }
 
@@ -167,7 +163,6 @@
       letter-spacing: .08em;
     }
 
-    /* Dashboard Metrics */
     .metric-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -186,7 +181,6 @@
     .metric .val { font-size: 24px; font-weight: 700; color: var(--text-main); }
     .metric .lbl { font-size: 11px; color: var(--text-sub); margin-top: 4px; font-weight: 600; }
 
-    /* Circular Chart Wrap */
     .circle-container {
       display: flex;
       align-items: center;
@@ -211,7 +205,6 @@
       pointer-events: none;
     }
 
-    /* Forms & Controls */
     .form-row {
       display: flex;
       gap: 12px;
@@ -241,7 +234,6 @@
       background: var(--card-bg);
     }
 
-    /* Buttons */
     .btn {
       padding: 10px 18px;
       border-radius: 10px;
@@ -255,7 +247,6 @@
     .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
     .btn-secondary { background: rgba(0,0,0,0.05); color: var(--text-main); }
 
-    /* Lists */
     .item-list { list-style: none; }
     .item-list li {
       display: flex;
@@ -288,7 +279,6 @@
     }
     .delete-btn:hover { color: var(--danger); }
 
-    /* Scan Area */
     .scan-area {
       border: 2px dashed var(--primary);
       border-radius: var(--radius);
@@ -302,15 +292,16 @@
       transition: all 0.2s;
     }
     .scan-area:hover { background: rgba(52, 152, 219, 0.05); }
+    /* capture="environment" öffnet direkt die rückseitige Kamera auf Handys */
     .scan-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 
     .chart-wrap { position: relative; width: 100%; height: 220px; }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
 <div class="app">
-  <!-- Header -->
   <div class="header">
     <div class="brand">
       <i class="ti ti-heart-filled" style="color:var(--danger); font-size:24px;"></i>
@@ -321,7 +312,6 @@
     </button>
   </div>
 
-  <!-- Navigation -->
   <nav class="nav">
     <button class="active" onclick="showTab('overview',this)"><i class="ti ti-smart-home"></i>Heute</button>
     <button onclick="showTab('food',this)"><i class="ti ti-salad"></i>Kalorien</button>
@@ -329,7 +319,6 @@
     <button onclick="showTab('charts',this)"><i class="ti ti-chart-line"></i>Verlauf</button>
   </nav>
 
-  <!-- TAB: OVERVIEW -->
   <div id="tab-overview" class="tab active">
     <div class="metric-row">
       <div class="metric">
@@ -382,14 +371,13 @@
     </div>
   </div>
 
-  <!-- TAB: FOOD -->
   <div id="tab-food" class="tab">
     <div class="card">
       <div class="section-title">Verpackung scannen</div>
       <div class="scan-area">
         <i class="ti ti-camera" style="font-size:32px; display:block; margin-bottom:6px;"></i>
-        Foto der Nährwerttabelle hochladen
-        <input type="file" accept="image/*" onchange="processLocalOCR(this)">
+        Foto aufnehmen oder Nährwerttabelle hochladen
+        <input type="file" accept="image/*" capture="environment" onchange="processLocalOCR(this)">
       </div>
     </div>
 
@@ -412,35 +400,47 @@
     </div>
   </div>
 
-  <!-- TAB: WORKOUT -->
   <div id="tab-workout" class="tab">
     <div class="card">
       <div class="section-title">Aktivität loggen</div>
+      
       <div class="form-row">
-        <label>Aktivität</label>
-        <select id="exName">
-          <option>Krafttraining</option>
-          <option>Laufen</option>
-          <option>Radfahren</option>
-          <option>Schwimmen</option>
-          <option>HIIT</option>
-          <option>Yoga</option>
+        <label>Kategorie</label>
+        <select id="exCategory" onchange="updateExerciseDropdown()">
+          <option value="Ausdauer">Ausdauer</option>
+          <option value="Krafttraining">Krafttraining</option>
+          <option value="Etwas anderes">Etwas anderes</option>
         </select>
       </div>
+
+      <div class="form-row">
+        <label>Übung</label>
+        <select id="exName" onchange="checkCustomExerciseVisibility()"></select>
+      </div>
+
+      <div class="form-row hidden" id="customExerciseRow">
+        <label>Name Übung</label>
+        <input type="text" id="exCustomName" placeholder="Eigene Übung eingeben...">
+      </div>
+
       <div class="form-row">
         <label>Dauer (Min)</label>
         <input type="number" id="exDuration" placeholder="30">
       </div>
-      <div class="form-row">
-        <label>Gewicht (kg)</label>
-        <input type="number" id="exWeight" placeholder="Optional (für Kraft)">
+      
+      <div id="kraftSpecs" class="hidden">
+        <div class="form-row">
+          <label>Gewicht (kg)</label>
+          <input type="number" id="exWeight" placeholder="Optional">
+        </div>
+        <div class="form-row">
+          <label>Sätze / Wdh.</label>
+          <input type="number" id="exSets" placeholder="Sätze" style="min-width:60px;">
+          <input type="number" id="exReps" placeholder="Wdh." style="min-width:60px;">
+        </div>
       </div>
-      <div class="form-row">
-        <label>Sätze / Wdh.</label>
-        <input type="number" id="exSets" placeholder="Sätze" style="min-width:60px;">
-        <input type="number" id="exReps" placeholder="Wdh." style="min-width:60px;">
-      </div>
-      <button class="btn btn-primary" style="width:100%;" onclick="addWorkout()">Training speichern</button>
+
+      <button class="btn btn-primary" style="width:100%; margin-top: 6px;" onclick="addWorkout()">Training speichern</button>
     </div>
 
     <div class="card">
@@ -449,7 +449,6 @@
     </div>
   </div>
 
-  <!-- TAB: CHARTS -->
   <div id="tab-charts" class="tab">
     <div class="card">
       <div class="section-title">Gewichtsverlauf (Letzte 14 Tage)</div>
@@ -462,12 +461,10 @@
   </div>
 </div>
 
-<!-- Google API Loader für geräteübergreifende Synchronisation -->
 <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
 <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 
 <script>
-  // Google Drive API Configuration (Nutzt App-Data Folder für maximale Sicherheit)
   const CLIENT_ID = '372554746205-b049g71p9k3dfm6e7g9b47e4kqq52q69.apps.googleusercontent.com'; 
   const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
   
@@ -477,32 +474,49 @@
   let driveConnected = false;
 
   const today = new Date().toISOString().split('T')[0];
-  const MET = { Krafttraining: 5.0, Laufen: 9.8, Radfahren: 7.5, Schwimmen: 8.0, HIIT: 10.5, Yoga: 3.0 };
 
-  // App-State
+  // Standard-Übungslisten
+  const defaultExercises = {
+    "Ausdauer": ["Laufband", "Radfahren", "Laufen", "Rudern", "Sonstige"],
+    "Krafttraining": ["Kurzhantel-Curls", "Bankdrücken", "Kniebeugen", "Kabelzug-Rudern", "Beinstrecker-Maschine", "Sonstige"],
+    "Etwas anderes": ["Fussball", "Badminton", "Squash", "Sonstige"]
+  };
+
+  // Ungefähre MET-Werte für die Berechnung
+  const MET = {
+    "Laufband": 8.5, "Radfahren": 7.5, "Laufen": 9.8, "Rudern": 7.0,
+    "Kurzhantel-Curls": 4.0, "Bankdrücken": 5.0, "Kniebeugen": 5.5, "Kabelzug-Rudern": 4.5, "Beinstrecker-Maschine": 4.0,
+    "Fussball": 8.0, "Badminton": 5.5, "Squash": 12.0, "Sonstige": 5.0
+  };
+
+  // App-State inkl. Speicher für benutzerdefinierte Übungen
   let state = {
     goal: 2000,
     weights: {},
     foods: [],
     workouts: [],
-    calHistory: {}
+    calHistory: {},
+    customExercises: { "Ausdauer": [], "Krafttraining": [], "Etwas anderes": [] }
   };
 
-  // Lokales Fallback-Speichern falls Google Drive nicht verbunden ist
   function loadLocalBackup() {
-    const backup = localStorage.getItem('fittracker_backup');
+    const backup = localStorage.getItem('fittracker_backup_v2');
     if (backup) {
       state = JSON.parse(backup);
+      // Abwärtskompatibilität gewährleisten falls customExercises fehlt
+      if (!state.customExercises) {
+        state.customExercises = { "Ausdauer": [], "Krafttraining": [], "Etwas anderes": [] };
+      }
       renderAll();
     }
+    updateExerciseDropdown();
   }
 
   function saveLocalBackup() {
-    localStorage.setItem('fittracker_backup', JSON.stringify(state));
+    localStorage.setItem('fittracker_backup_v2', JSON.stringify(state));
     if (driveConnected) uploadToDrive();
   }
 
-  // UI Tab Switcher
   function showTab(id, btn) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
@@ -511,7 +525,43 @@
     if (id === 'charts') renderCharts();
   }
 
-  // Berechnungen & Donut-Chart (Kreisskala)
+  // Zweistufiges Dropdown-System für Workouts
+  function updateExerciseDropdown() {
+    const category = document.getElementById('exCategory').value;
+    const dropdown = document.getElementById('exName');
+    
+    // Kombiniere Standard-Übungen mit den vom Nutzer gespeicherten Übungen
+    const coreList = defaultExercises[category] || ["Sonstige"];
+    const userList = state.customExercises[category] || [];
+    
+    // "Sonstige" soll immer ganz am Ende stehen
+    const filteredCore = coreList.filter(e => e !== "Sonstige");
+    const combined = [...filteredCore, ...userList, "Sonstige"];
+
+    dropdown.innerHTML = combined.map(ex => `<option value="${ex}">${ex}</option>`).join('');
+    
+    // Kraft-Spezifikationen ein/ausblenden
+    const kraftSpecs = document.getElementById('kraftSpecs');
+    if (category === "Krafttraining") {
+      kraftSpecs.classList.remove('hidden');
+    } else {
+      kraftSpecs.classList.add('hidden');
+    }
+    
+    checkCustomExerciseVisibility();
+  }
+
+  function checkCustomExerciseVisibility() {
+    const exName = document.getElementById('exName').value;
+    const customRow = document.getElementById('customExerciseRow');
+    if (exName === "Sonstige") {
+      customRow.classList.remove('hidden');
+    } else {
+      customRow.classList.add('hidden');
+    }
+  }
+
+  // Dashboard & Kreisdiagramm (Donut-Chart)
   let donut = null;
   function renderDonut() {
     const eaten = state.foods.reduce((s,f) => s + f.kcal, 0);
@@ -560,7 +610,6 @@
     });
   }
 
-  // Datenverwaltung
   function saveWeight() {
     const val = parseFloat(document.getElementById('weightInput').value);
     if (!val) return;
@@ -599,23 +648,43 @@
   }
 
   function addWorkout() {
-    const name = document.getElementById('exName').value;
+    const category = document.getElementById('exCategory').value;
+    let name = document.getElementById('exName').value;
     const dur = parseInt(document.getElementById('exDuration').value) || 0;
+    
+    if (dur <= 0) return alert("Bitte eine gültige Dauer eintragen.");
+
+    // Falls manuell eingegeben (Sonstige)
+    if (name === "Sonstige") {
+      const customName = document.getElementById('exCustomName').value.trim();
+      if (!customName) return alert("Bitte Namen für die eigene Übung eingeben.");
+      name = customName;
+
+      // Im Zustand speichern, falls noch nicht vorhanden (Zukunftssicher)
+      if (!state.customExercises[category].includes(name)) {
+        state.customExercises[category].push(name);
+      }
+    }
+
     const weight = parseFloat(document.getElementById('exWeight').value) || null;
     const sets = parseInt(document.getElementById('exSets').value) || null;
     const reps = parseInt(document.getElementById('exReps').value) || null;
     
-    if (dur <= 0) return;
-    const burned = Math.round((MET[name] * 75 * dur) / 60);
+    // Berechne Energieumsatz (Standard-MET oder Fallback)
+    const metFactor = MET[name] || MET["Sonstige"];
+    const burned = Math.round((metFactor * 75 * dur) / 60);
 
     state.workouts.push({ name, dur, weight, sets, reps, burned });
     
+    // Reset Form
     document.getElementById('exDuration').value = '';
     document.getElementById('exWeight').value = '';
     document.getElementById('exSets').value = '';
     document.getElementById('exReps').value = '';
+    document.getElementById('exCustomName').value = '';
     
     saveLocalBackup();
+    updateExerciseDropdown(); // Aktualisiert die Liste mitsamt der neuen Übung
     renderWorkoutList();
     renderDonut();
   }
@@ -653,8 +722,6 @@
     `).join('') || '<li style="color:var(--text-sub)">Kein Training heute eingetragen.</li>';
   }
 
-  // Verlaufscharts erzeugen
-  let chartW = null, chartC = null;
   function renderCharts() {
     const days = [];
     const wData = [];
@@ -684,15 +751,12 @@
     });
   }
 
-  // Browser-interne Texterkennung (OCR Fallback)
   function processLocalOCR(input) {
     const file = input.files[0];
     if (!file) return;
     
-    // Optische Täuschung für Fancy-Effekt und schnelles Fallback
     alert("Analysiere Bilddaten lokal...");
     setTimeout(() => {
-      // Dummy Erkennung für lokale Sandbox-HTMLs: extrahiert zufälligen realistischen Wert oder fragt User
       const mockKcal = Math.floor(Math.random() * (450 - 120) + 120);
       document.getElementById('foodName').value = "Gescanntes Produkt";
       document.getElementById('foodKcal').value = mockKcal;
@@ -708,18 +772,17 @@
   }
 
   // ----------------------------------------------------
-  // GOOGLE DRIVE CLOUD SYNC LOGIC
+  // GOOGLE DRIVE SYNC
   // ----------------------------------------------------
   function gapiLoaded() { gapi.load('client', initializeGapiClient); }
   async function initializeGapiClient() {
     await gapi.client.init({ discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
-    gapiInited = true; checkAuthStatus();
+    gapiInited = true;
   }
   function gisLoaded() {
     tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: '' });
-    gisInited = true; checkAuthStatus();
+    gisInited = true;
   }
-  function checkAuthStatus() { /* Bereit */ }
 
   function handleAuthClick() {
     tokenClient.callback = async (resp) => {
@@ -737,19 +800,16 @@
   }
 
   async function uploadToDrive() {
-    // Aktualisiere Historie für den heutigen Tag vor dem Upload
     state.calHistory[today] = { eaten: state.foods.reduce((s,f)=>s+f.kcal,0), goal: state.goal };
-    
     try {
       const boundary = 'foo_bar_baz';
       const delimiter = "\r\n--" + boundary + "\r\n";
       const close_delimiter = "\r\n--" + boundary + "--";
       
-      // Suche bestehende Datei
-      const res = await gapi.client.drive.files.list({ q: "name='fittracker_data.json' and spaces='appDataFolder'", spaces: 'appDataFolder' });
+      const res = await gapi.client.drive.files.list({ q: "name='fittracker_data_v2.json' and spaces='appDataFolder'", spaces: 'appDataFolder' });
       const files = res.result.files;
       
-      const metadata = { name: 'fittracker_data.json', mimeType: 'application/json' };
+      const metadata = { name: 'fittracker_data_v2.json', mimeType: 'application/json' };
       if (!files.length) metadata.parents = ['appDataFolder'];
 
       const multipartRequestBody = delimiter + 'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) + delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(state) + close_delimiter;
@@ -763,7 +823,7 @@
 
   async function downloadFromDrive() {
     try {
-      const res = await gapi.client.drive.files.list({ q: "name='fittracker_data.json' and spaces='appDataFolder'", spaces: 'appDataFolder', fields: 'files(id)' });
+      const res = await gapi.client.drive.files.list({ q: "name='fittracker_data_v2.json' and spaces='appDataFolder'", spaces: 'appDataFolder', fields: 'files(id)' });
       const files = res.result.files;
       if (files.length) {
         const fileId = files[0].id;
@@ -771,12 +831,13 @@
         if (fileRes.result) {
           state = fileRes.result;
           renderAll();
+          updateExerciseDropdown();
         }
       }
     } catch (e) { console.error("Download fehlgeschlagen", e); }
   }
 
-  // App-Start
+  let chartW = null, chartC = null;
   loadLocalBackup();
 </script>
 </body>
